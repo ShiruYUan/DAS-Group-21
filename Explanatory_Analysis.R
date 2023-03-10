@@ -37,4 +37,4 @@ library(GGally)
 pairs(group21_new)
 pairs(~width+height+depth, data=group21_new)
 
-111
+11111
