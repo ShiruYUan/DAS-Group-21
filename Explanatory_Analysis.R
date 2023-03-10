@@ -36,3 +36,5 @@ grid.arrange(p1,p2,p3,nrow=2)
 library(GGally)
 pairs(group21_new)
 pairs(~width+height+depth, data=group21_new)
+
+111
