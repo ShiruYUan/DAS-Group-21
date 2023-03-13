@@ -1,6 +1,6 @@
 ---
 title: "Group_21_Analysis"
-author: "Group21"
+author: "group21"
 date: "2023-03-08"
 output: pdf_document
 ---
@@ -9,8 +9,10 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r, echo=FALSE}
+```{r echo=FALSE}
+library(ggplot2)
 library(dplyr)
+library(moderndive)
 library(gapminder)
 library(kableExtra)
 library(gridExtra)
@@ -23,10 +25,11 @@ library(stats)
 library(jtools)
 library(janitor)
 ```
-# Data preprocessing
+
+## Data preprocessing
 ```{r group21_new}
 #Read the data
-group21_new <- read.csv("/Users/meng/Group21/dataset21.csv")
+group21_new <- read.csv("C:/Users/DELL/Desktop/dataset21.csv")
 
 #Calculates the column median, replacing the missing value with the median
 median_depth<- median(group21_new$depth,na.rm = TRUE)
@@ -63,7 +66,7 @@ group21_new$category <- as.factor(group21_new$category)
 group21_new$other_colors <- as.factor(group21_new$other_colors)
 ```
 
-# Explanatory analysis
+## Explanatory analysis
 ```{r}
 #summary statistic
 group21_new%>%
@@ -89,15 +92,17 @@ ggplot(data = group21_new, aes(x = newprice, y = width , fill = newprice))+
 ```
 
 ```{r}
+#barplot
 group21_new %>%
   tabyl(category, newprice) %>%
   adorn_percentages() %>%
   adorn_pct_formatting() %>%
-  adorn_ns() # To show original counts
+  adorn_ns() # To show original counts,有点问题
 ggplot(data = group21_new, aes(x = newprice, group = category)) +
   geom_bar(aes(y = after_stat(prop), fill = category), stat = "count", position = "dodge") +
   labs(x = "More than 1000?", y = "Proportion")
 
+str(group21_new)
 group21_new %>%
   tabyl(sellable_online, newprice) %>%
   adorn_percentages() %>%
@@ -117,25 +122,26 @@ ggplot(data = group21_new, aes(x = newprice, group = other_colors)) +
   labs(x = "More than 1000?", y = "Proportion")
 ```
 
-# Formal analysis
+## Formal Analysis
 ```{r}
-#Fit the GLM with all variables
-model<- glm(newprice ~ category+sellable_online+other_colors+depth+height+width, data = group21_new,
-               family = binomial(link = "logit"))
+#Fit a GLM with all variables
+model_1<- glm(newprice ~ category+sellable_online+other_colors+depth+height+width, data = group21_new,
+                   family = binomial(link = "logit"))
+model_1 %>%
+  summary()
 
-#Use stepwise selection to select best model
-step_model <- step(model, direction = "both")
+#Use stepwise selection to select the most important variables
+step_model<- step(model_1,direction = "both")
 
-#Based on AIC pick the best fitted model
+#Based on AIC pick the best model 
 model_2 <- glm(newprice ~ category+height+width, data = group21_new,
                family = binomial(link = "logit"))
 model_2 %>%
   summary()
-
 plot_model(model_2, show.values = TRUE, transform = NULL,
            title = "Log-Odds_attach", show.p = FALSE)
 
-#Omit the variables by checking the p-value
+#omit the variables by checking p-value
 data_1 <- filter(group21_new, category!="Caf\xe9 furniture")
 data_2 <- filter(data_1, category!="Chairs")
 data_3 <- filter(data_2, category!="Chests of drawers & drawer units")
