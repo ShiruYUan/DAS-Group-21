@@ -22,7 +22,6 @@ library(sjPlot)
 library(stats)
 library(jtools)
 library(janitor)
-
 ```
 # Data preprocessing
 ```{r group21_new}
