@@ -1,6 +1,6 @@
 ---
 title: "Group_21_Analysis"
-author: "group21"
+author: "Group21"
 date: "2023-03-08"
 output: pdf_document
 ---
@@ -9,54 +9,158 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-```{r group21_new}
-group21_new$category<-as.factor(group21_new$category)
-group21_new$sellable_online<-as.factor(group21_new$sellable_online)
-group21_new$newprice<-as.factor(group21_new$newprice)
-group21_new$other_colors<-as.factor(group21_new$other_colors)
-```
-
-## Explanatory analysis
-```{r group21_new}
-#summary statistic
-summary(group21_new[,2:7])
-```
-
-```{r group21_new}
-#histogram
-library(ggplot2)
+```{r, echo=FALSE}
+library(dplyr)
+library(gapminder)
+library(kableExtra)
 library(gridExtra)
-h1<-ggplot()+ 
-  geom_bar(data =group21_new,
-           aes(x = factor(category),fill = factor(newprice)),
-           position = "fill")
-h2<-ggplot()+ 
-  geom_bar(data=group21_new,
-           aes(x=factor(sellable_online),fill = factor(newprice)),
-           position="fill")
-h3<-ggplot()+ 
-  geom_bar(data = group21_new,
-           aes(x = factor(other_colors),fill = factor(newprice)),
-           position = "fill")
-grid.arrange(h1,h2,h3,nrow=3)
-```
-
-```{r group21_new}
-#box plot
-p1<-ggplot(group21_new, aes(x=width, y=newprice)) + 
-  geom_boxplot()
-p2<-ggplot(group21_new, aes(x=height, y=newprice)) + 
-  geom_boxplot()
-p3<-ggplot(group21_new, aes(x=depth, y=newprice)) + 
-  geom_boxplot()
-grid.arrange(p1,p2,p3,nrow=2)
-```
-
-```{r group21_new}
-#correlation plot
+library(skimr)
+library(knitr)
 library(GGally)
-pairs(group21_new)
-pairs(~width+height+depth, data=group21_new)
+library(tidyverse)
+library(sjPlot)
+library(stats)
+library(jtools)
+library(janitor)
+```
+# Data preprocessing
+```{r group21_new}
+#Read the data
+group21_new <- read.csv("/Users/meng/Group21/dataset21.csv")
+
+#Calculates the column median, replacing the missing value with the median
+median_depth<- median(group21_new$depth,na.rm = TRUE)
+median_depth
+group21_new <- group21_new %>%
+  mutate(depth = ifelse(is.na(depth), median_depth, depth))
+
+median_height <- median(group21_new$height,na.rm = TRUE)
+group21_new <- group21_new %>%
+  mutate(height = ifelse(is.na(height), median_height, height))
+
+median_width <- median(group21_new$width,na.rm = TRUE)
+median_width
+group21_new <- group21_new %>%
+  mutate(width = ifelse(is.na(width), median_width, width))
+
+#Final dataset
+W <- rep(0,500)
+group21_new$newprice <- W
+group21_new$newprice[group21_new$price>1000]=1
+group21_new <- group21_new %>%
+  select(category,sellable_online,other_colors,depth,height,width,price,newprice)
+
+group21_new
+dim(group21_new)
+View(group21_new)
+sum(is.na(group21_new))
+
+#Analysis
+group21_new$newprice <- as.factor(group21_new$newprice)
+levels(group21_new$newprice) <- c("more than", "no more than")
+group21_new$sellable_online <- as.factor(group21_new$sellable_online)
+group21_new$category <- as.factor(group21_new$category)
+group21_new$other_colors <- as.factor(group21_new$other_colors)
+```
+
+# Explanatory analysis
+```{r}
+#summary statistic
+group21_new%>%
+  skim()
+```
+
+```{r}
+#boxplot
+ggplot(data = group21_new, aes(x = newprice, y = depth , fill = newprice))+
+  geom_boxplot() +
+  labs(x = "More than 1000?", y = "Depth")+ 
+  theme(legend.position = "none")
+
+ggplot(data = group21_new, aes(x = newprice, y = height , fill = newprice))+
+  geom_boxplot() +
+  labs(x = "More than 1000?", y = "Height")+ 
+  theme(legend.position = "none")
+
+ggplot(data = group21_new, aes(x = newprice, y = width , fill = newprice))+
+  geom_boxplot() +
+  labs(x = "More than 1000?", y = "Width")+ 
+  theme(legend.position = "none")
+```
+
+```{r}
+group21_new %>%
+  tabyl(category, newprice) %>%
+  adorn_percentages() %>%
+  adorn_pct_formatting() %>%
+  adorn_ns() # To show original counts
+ggplot(data = group21_new, aes(x = newprice, group = category)) +
+  geom_bar(aes(y = after_stat(prop), fill = category), stat = "count", position = "dodge") +
+  labs(x = "More than 1000?", y = "Proportion")
+
+group21_new %>%
+  tabyl(sellable_online, newprice) %>%
+  adorn_percentages() %>%
+  adorn_pct_formatting() %>%
+  adorn_ns() # To show original counts
+ggplot(data = group21_new, aes(x = newprice, group = sellable_online)) +
+  geom_bar(aes(y = after_stat(prop), fill = sellable_online), stat = "count", position = "dodge") +
+  labs(x = "More than 1000?", y = "Proportion")
+
+group21_new %>%
+  tabyl(other_colors, newprice) %>%
+  adorn_percentages() %>%
+  adorn_pct_formatting() %>%
+  adorn_ns() # To show original counts
+ggplot(data = group21_new, aes(x = newprice, group = other_colors)) +
+  geom_bar(aes(y = after_stat(prop), fill = other_colors), stat = "count", position = "dodge") +
+  labs(x = "More than 1000?", y = "Proportion")
+```
+
+# Formal analysis
+```{r}
+#Fit the GLM with all variables
+model<- glm(newprice ~ category+sellable_online+other_colors+depth+height+width, data = group21_new,
+               family = binomial(link = "logit"))
+
+#Use stepwise selection to select best model
+step_model <- step(model, direction = "both")
+
+#Based on AIC pick the best fitted model
+model_2 <- glm(newprice ~ category+height+width, data = group21_new,
+               family = binomial(link = "logit"))
+model_2 %>%
+  summary()
+
+plot_model(model_2, show.values = TRUE, transform = NULL,
+           title = "Log-Odds_attach", show.p = FALSE)
+
+#Omit the variables by checking the p-value
+data_1 <- filter(group21_new, category!="Caf\xe9 furniture")
+data_2 <- filter(data_1, category!="Chairs")
+data_3 <- filter(data_2, category!="Chests of drawers & drawer units")
+data_4 <- filter(data_3, category!="Children's furniture")
+data_5 <- filter(data_4, category!="Nursery furniture")
+data_6 <- filter(data_5, category!="Outdoor furniture")
+data_7 <- filter(data_6, category!="Room dividers")
+data_8 <- filter(data_7, category!="Sideboards, buffets & console tables")
+data_9 <- filter(data_8, category!="Sofas & armchairs")
+data_10 <- filter(data_9, category!="Tables & desks")
+data_11 <- filter(data_10, category!="Trolleys")
+
+model_3 <- glm(newprice ~ category+height+width, data = data_11,
+               family = binomial(link = "logit"))
+model_3 %>%
+  summary()
+
+data_12 <- filter(data_11, category!="Beds")
+model_4 <- glm(newprice ~ category+height+width, data = data_12,
+               family = binomial(link = "logit"))
+model_4 %>%
+  summary()
+plot_model(model_4, show.values = TRUE, transform = NULL,
+           title = "Log-Odds_attach", show.p = FALSE)
+
+plot_model(model_4, show.values = TRUE,
+           title = "", show.p = FALSE, value.offset = 0.25)
 ```
