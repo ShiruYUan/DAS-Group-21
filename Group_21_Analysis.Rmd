@@ -96,7 +96,7 @@ b3<-ggplot(data = group21_new, aes(x = newprice, y = width , fill = newprice))+
 
 grid.arrange(b1, b2,b3, ncol=3)
 ```
-Figure \ref{box:Newprice}, shows three different variables (`depth`, `height`, `width`) in `newprice`. It can be t that there is more difference in Plot3 between `newprice` and `width`, meaning the `width` will influence the price more than other two variables.
+Figure \ref{box:Newprice}, shows three different variables (`depth`, `height`, `width`) in `newprice`. It can be told that there is more difference in Plot3 between `newprice` and `width`, meaning the `width` will influence the price more than other two variables.
 
 ### Barplot
 A barplot is here used to determine the connection between categorical factors and the newprice.
