@@ -29,6 +29,30 @@ library(janitor)
 group21_new <- read.csv("/Users/meng/Group21/dataset21.csv")
 ```
 
+## Introduction
+
+### Data describtion
+
+Our data in this case is about furniture in IKEA Saudi Arabia.
+
+Features are as below:
+
+-   item_id -- Unique item ID for item of furniture
+
+-   category -- The furniture category the item belongs to
+
+-   price -- The current price in Saudi Riyals (as recorded on 20/04/2020)
+
+-   sellable_online -- Is the item available to purchase online?
+
+-   other_colors -- Is the item available in other colours
+
+-   depth -- Depth of the item in cm
+
+-   height -- Height of the item in cm
+
+-   width -- width of the item in cm
+
 ## Data preprocessing
 
 Before analysing the data, we do the data preprocessing. In this part, we choose to use variable's median to replace its missing value to get our final dataset.
@@ -206,8 +230,9 @@ modcoefs <- round(coef(model_4), 2)
 confint(model_4) %>%
   kable()
 ```
-$$\ln(\displaystyle\frac{p}{1-p})=\alpha+\beta_{1}x_{i}+ \beta_{2}\textrm{depth}+ \beta_{3} \textrm{depth}$$
-,where $x_{i}$ is the ith category.
+
+$$\ln(\displaystyle\frac{p}{1-p})=\alpha+\beta_{1}x_{i}+ \beta_{2}\textrm{depth}+ \beta_{3} \textrm{depth}$$ ,where $x_{i}$ is the ith category.
+
 ```{r, warning=FALSE, message=FALSE}
 plot_model(model_4, show.values = TRUE, transform = NULL,
            title = "Log-Odds_attach", show.p = FALSE)
@@ -219,8 +244,9 @@ model_4 %>%
   coef() %>%
   exp()
 ```
-$\displaystyle\frac{p}{1-p}=exp(\alpha+\beta_{1}x_{i}+ \beta_{2}\textrm{depth}+ \beta_{3} \textrm{depth})$
-,where $x_{i}$ is the ith category.
+
+$\displaystyle\frac{p}{1-p}=exp(\alpha+\beta_{1}x_{i}+ \beta_{2}\textrm{depth}+ \beta_{3} \textrm{depth})$ ,where $x_{i}$ is the ith category.
+
 ```{r, warning=FALSE, message=FALSE}
 plot_model(model_4, show.values = TRUE, axis.lim = c(1,1.5),
            title = "Odds (less)", show.p = FALSE)
