@@ -3,6 +3,7 @@ title: "Group_21_Analysis"
 author: "Group21"
 date: "2023-03-13"
 output: html_document
+encoding: UTF-16
 ---
 
 ```{r setup, include=FALSE}
@@ -149,7 +150,6 @@ bar1
 Figure \ref{bar1:Newprice}
 
 ```{r barplot2, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice} boxplot of newprice by categorical vairalbes"}
-str(group21_new)
 group21_new %>%
   tabyl(newprice, sellable_online) %>%
   adorn_percentages() %>%
@@ -196,8 +196,6 @@ model_2 <- glm(newprice ~ category+height+width, data = group21_new,
                family = binomial(link = "logit"))
 model_2 %>%
   summary()
-plot_model(model_2, show.values = TRUE, transform = NULL,
-           title = "Log-Odds_attach", show.p = FALSE)
 
 #omit the variables by checking p-value
 data_1 <- filter(group21_new, category!="Caf\xe9 furniture")
