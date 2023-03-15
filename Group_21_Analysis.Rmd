@@ -117,7 +117,7 @@ group21_new %>%
   adorn_percentages() %>%
   adorn_pct_formatting() %>%
   adorn_ns() # To show original counts
-ggplot(data = group21_new, aes(x = newprice, group = category)) +
+bar1<-ggplot(data = group21_new, aes(x = newprice, group = category)) +
   geom_bar(aes(y = after_stat(prop), fill = category), stat = "count", position = "dodge") +
   labs(x = "More or Less", y = "Proportion")
 
@@ -127,7 +127,7 @@ group21_new %>%
   adorn_percentages() %>%
   adorn_pct_formatting() %>%
   adorn_ns() # To show original counts
-ggplot(data = group21_new, aes(x = newprice, group = sellable_online)) +
+bar2<-ggplot(data = group21_new, aes(x = newprice, group = sellable_online)) +
   geom_bar(aes(y = after_stat(prop), fill = sellable_online), stat = "count", position = "dodge") +
   labs(x = "More or Less", y = "Proportion")
 
@@ -136,9 +136,10 @@ group21_new %>%
   adorn_percentages() %>%
   adorn_pct_formatting() %>%
   adorn_ns() # To show original counts
-ggplot(data = group21_new, aes(x = newprice, group = other_colors)) +
+bar3<-ggplot(data = group21_new, aes(x = newprice, group = other_colors)) +
   geom_bar(aes(y = after_stat(prop), fill = other_colors), stat = "count", position = "dodge") +
   labs(x = "More or Less", y = "Proportion")
+grid.arrange(bar1, bar2,bar3, nrow=3)
 ```
 
 Figure \ref{bar:Newprice}
