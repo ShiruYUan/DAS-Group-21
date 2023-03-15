@@ -134,39 +134,46 @@ Figure \ref{box:Newprice}, shows three different variables (`depth`, `height`, `
 
 A barplot is here used to determine the connection between categorical factors and the newprice.
 
-```{r barplot, warning=FALSE, message=FALSE, fig.cap="\\label{bar:Newprice} boxplot of newprice by categorical vairalbes"}
+```{r barplot1, warning=FALSE, message=FALSE, fig.cap="\\label{bar1:Newprice} boxplot of newprice by categorical vairalbes"}
 #Barplot
 group21_new %>%
-  tabyl(category, newprice) %>%
+  tabyl(newprice, category) %>%
   adorn_percentages() %>%
   adorn_pct_formatting() %>%
   adorn_ns() # To show original counts
 bar1<-ggplot(data = group21_new, aes(x = newprice, group = category)) +
   geom_bar(aes(y = after_stat(prop), fill = category), stat = "count", position = "dodge") +
   labs(x = "More or Less", y = "Proportion")
+bar1
+```
+Figure \ref{bar1:Newprice}
 
+```{r barplot2, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice} boxplot of newprice by categorical vairalbes"}
 str(group21_new)
 group21_new %>%
-  tabyl(sellable_online, newprice) %>%
+  tabyl(newprice, sellable_online) %>%
   adorn_percentages() %>%
   adorn_pct_formatting() %>%
   adorn_ns() # To show original counts
 bar2<-ggplot(data = group21_new, aes(x = newprice, group = sellable_online)) +
   geom_bar(aes(y = after_stat(prop), fill = sellable_online), stat = "count", position = "dodge") +
   labs(x = "More or Less", y = "Proportion")
+bar2
+```
+Figure \ref{bar2:Newprice}
 
+```{r barplot3, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice} boxplot of newprice by categorical vairalbes"}
 group21_new %>%
-  tabyl(other_colors, newprice) %>%
+  tabyl(newprice, other_colors) %>%
   adorn_percentages() %>%
   adorn_pct_formatting() %>%
   adorn_ns() # To show original counts
 bar3<-ggplot(data = group21_new, aes(x = newprice, group = other_colors)) +
   geom_bar(aes(y = after_stat(prop), fill = other_colors), stat = "count", position = "dodge") +
   labs(x = "More or Less", y = "Proportion")
-grid.arrange(bar1, bar2,bar3, nrow=3)
+bar3
 ```
-
-Figure \ref{bar:Newprice}
+Figure \ref{bar3:Newprice}
 
 ## Formal Analysis
 
