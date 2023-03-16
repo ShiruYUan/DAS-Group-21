@@ -2,7 +2,7 @@
 title: "Group_21_Analysis"
 author: "Group21"
 date: "2023-03-13"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -89,14 +89,14 @@ dim(group21_new)
 sum(is.na(group21_new))
 ```
 
-```{r colinearityNumeric, warning=FALSE, message=FALSE,fig.cap="\\label{cor:numerical}colinearity in numerical variables"}
+```{r colinearityNumeric, warning=FALSE, message=FALSE,fig.cap="\\label{cor:numerical}Correlation in numerical variables", fig.width=3, fig.width=5}
 #To see if there is colinearity in the numerical variables
-ggpairs(group21_new,columns = c(4:6), title = "Correlation bewteen numerical variables")
+ggpairs(group21_new,columns = c(4:6), title = "Correlation between numerical variables",)
 ```
 
 Figure \ref{cor:numerical} shows that, there's weak relationship between `height` and `depth`(0.019), mild relationship between `width` and `depth`(0.362) and moderate relationship between `width` and `height`(0.402).
 
-```{r scaledata, warning=FALSE, message=FALSE,include=False}
+```{r scaledata, warning=FALSE, message=FALSE}
 round(diag(var(group21_new[,4:6])),2) ##significant difference variance
 group21_new$depth <- scale(group21_new$depth,center=TRUE, scale=TRUE)
 group21_new$height <- scale(group21_new$height,center=TRUE, scale=TRUE)
@@ -105,16 +105,16 @@ group21_new$width <- scale(group21_new$width,center=TRUE, scale=TRUE)
 
 Then we use chi-square test to check if there is colinearity in the three categorical variables
 
-```{r colinearitycategorical, warning=FALSE, message=FALSE,fig.cap="\\label{cor:categorical}colinearity in categorical variables"}
+```{r colinearitycategorical, warning=FALSE, message=FALSE,fig.cap="\\label{cor:categorical}Colinearity in categorical variables"}
 table_variable_1 <- table(group21_new$category, group21_new$sellable_online)
 chisq_result_1 <- chisq.test(table_variable_1)
-chisq_result_1 #p-value>0.05, we do not reject H0 and there is no colinearity between category and sellable_online.
 table_variable_2 <- table(group21_new$category, group21_new$other_colors)
 chisq_result__2 <- chisq.test(table_variable_2)
-chisq_result__2#p-value<0.05, we reject H0 and there is colinearity between category and other_colors.
 table_variable_3 <- table(group21_new$other_colors, group21_new$sellable_online)
 chisq_result_3 <- chisq.test(table_variable_3)
-chisq_result_3#p-value>0.05, we do not reject H0 and there is no colinearity between other_colors and sellable_online.
+chisq_result_1 #p-value>0.05, there is no colinearity between category and sellable_online.
+chisq_result__2#p-value<0.05,there is colinearity between category and other_colors.
+chisq_result_3#p-value>0.05, there is no colinearity between other_colors and sellable_online.
 ```
 
 From the output above, collinearity only happens between `category` and `other_colors`, but not between other categorical variables.
@@ -130,15 +130,14 @@ levels(group21_new$newprice) <- c("more", "less")
 
 ```{r summary, warning=FALSE, message=FALSE}
 #Summary statistic
-group21_new%>%
-  skim()
+summary(group21_new)
 ```
 
 ### Boxplot
 
 A Boxplot is used here to find relationship between our response variable `newprice` and numeric variables.
 
-```{r boxplot, warning=FALSE, message=FALSE, fig.cap="\\label{box:Newprice} boxplot of newprice by numeric vairalbes"}
+```{r boxplot, warning=FALSE, message=FALSE, fig.cap="\\label{box:Newprice} Boxplot of newprice by numeric vairalbes"}
 #Boxplot
 box1<-ggplot(data = group21_new, aes(x = newprice, y = depth , fill = newprice))+
   geom_boxplot() +
@@ -154,8 +153,7 @@ box3<-ggplot(data = group21_new, aes(x = newprice, y = width , fill = newprice))
   geom_boxplot() +
   labs(x = "More or less", y = "Width")+ 
   theme(legend.position = "none")
-
-grid.arrange(box1, box2,box3, ncol=3)
+grid.arrange(box1,box2,box3,ncol=3)
 ```
 
 Figure \ref{box:Newprice}, shows three different variables (`depth`, `height`, `width`) in `newprice`. It can be told that there is more difference in Plot3 between `newprice` and `width`, meaning the `width` will influence the price more than other two variables.
@@ -164,7 +162,7 @@ Figure \ref{box:Newprice}, shows three different variables (`depth`, `height`, `
 
 A barplot is here used to determine the connection between categorical factors and the newprice.
 
-```{r proportion, warning=FALSE, message=FALSE, include=FALSE}
+```{r proportion, warning=FALSE, message=FALSE}
 #the proportion and barplots(categorical variables)
 group21_new %>%
   tabyl(newprice, category) %>%
@@ -185,24 +183,35 @@ group21_new %>%
   adorn_ns() # To show original counts
 ```
 
-```{r barplot, warning=FALSE, message=FALSE, fig.cap="\\label{bar:Newprice} boxplot of newprice by categorical vairalbes"}
+```{r barplot1, warning=FALSE, message=FALSE, fig.cap="\\label{bar1:Newprice} Boxplot of newprice by categorical vairalbes(category)"}
 #Barplot
 bar1<-ggplot()+ 
   geom_bar(data =group21_new,
            aes(x = factor(category),fill = factor(newprice)),
            position = "fill")
+bar1
+```
+
+Figure \ref{bar1:Newprice}
+
+```{r barplot2, warning=FALSE, message=FALSE, fig.cap="\\label{bar2:Newprice} Boxplot of newprice by categorical vairalbes(sellable_online)"}
 bar2<-ggplot()+ 
   geom_bar(data=group21_new,
            aes(x=factor(sellable_online),fill = factor(newprice)),
            position="fill")
+bar2
+```
+
+Figure \ref{bar2:Newprice}
+
+```{r barplot3, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice} Boxplot of newprice by categorical vairalbes(other_colors)"}
 bar3<-ggplot()+ 
   geom_bar(data =group21_new,
            aes(x = factor(other_colors),fill = factor(newprice)),
            position = "fill")
-grid.arrange(bar1,bar2,bar3,nrow=3)
 ```
 
-Figure \ref{bar:Newprice}
+Figure \ref{bar3:Newprice}
 
 ## Formal Analysis
 
@@ -241,6 +250,7 @@ step_model_3 <- step(model_3,direction = "both")
 
 model_4 <- glm(newprice ~ sellable_online+depth+height+width, data = group21_new,
                family = binomial(link = "logit"))
+
 #HLtest
 hl_2 <- hoslem.test(group21_new$newprice, fitted(model_4), g=10)
 hl_2  #p=0.000146<0.05, model_4 is not fitted well.
@@ -253,6 +263,7 @@ Then we want to in the complexity to our model.
 ```{r Widecomplexity,warning=FALSE, message=FALSE}
 model_5 <- glm(newprice ~ category+sellable_online+depth+height+width+I(depth^2)+I(depth^3), data = group21_new,
                family = binomial(link = "logit"))
+
 
 step_model_4<- step(model_5,direction = "both")
 
@@ -324,9 +335,7 @@ hl_7  #p=0.527>0.05, model_14 is fitted well.
 ```
 
 ## Conclusion
-
-可能要加一下conclusion
-
+要加一下conclusion
 ## Further extension
 
 For the further extension, we could check the GLMs' model assumtion , to see if the model really fits well. Also could use other method to detect all the models that seems to fit well from the formal analysis, to decide which one will perform the best from those models.
