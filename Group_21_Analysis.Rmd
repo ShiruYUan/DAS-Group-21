@@ -183,25 +183,40 @@ group21_new %>%
   adorn_ns() # To show original counts
 ```
 
-```{r barplot, warning=FALSE, message=FALSE, fig.cap="\\label{bar:Newprice} Boxplot of newprice by categorical vairalbes(category)"}
+```{r barplot1, warning=FALSE, message=FALSE, fig.cap="\\label{bar1:Newprice}Boxplot of newprice by categorical vairalbes(category)"}
 #Barplot
 bar1<-ggplot()+ 
   geom_bar(data =group21_new,
            aes(x = factor(category),fill = factor(newprice)),
-           position = "fill")
+           position = "fill")+
+  labs(x = "category", y = "newprice")
+bar1
+```
 
+Figure \ref{bar1:Newprice}
+
+```{r barplot2, warning=FALSE, message=FALSE, fig.cap="\\label{bar2:Newprice}Boxplot of newprice by categorical vairalbes(sellable_online)"}
 bar2<-ggplot()+ 
   geom_bar(data=group21_new,
            aes(x=factor(sellable_online),fill = factor(newprice)),
-           position="fill")
+           position="fill")+
+  labs(x = "sellable_online", y = "newprice")
+bar2
+```
 
+Figure \ref{bar2:Newprice}
+
+```{r barplot3, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice}Boxplot of newprice by categorical vairalbes(other_colors)"}
 bar3<-ggplot()+ 
   geom_bar(data =group21_new,
            aes(x = factor(other_colors),fill = factor(newprice)),
-           position = "fill")
-grid.arrange(bar1,bar2,bar3,nrow=3)
+           position = "fill")+
+  labs(x = "sellable_online", y = "newprice")
+
+bar3
 ```
-Figure \ref{bar:Newprice}
+
+Figure \ref{bar3:Newprice}
 
 ## Formal Analysis
 
