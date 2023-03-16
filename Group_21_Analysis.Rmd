@@ -323,40 +323,10 @@ hl_7 <- hoslem.test(group21_new$newprice, fitted(model_14), g=10)
 hl_7  #p=0.527>0.05, model_14 is fitted well.
 ```
 
-```{r baseline, warning=FALSE, message=FALSE}
-levels(data_12$newprice)
-```
+## Conclusion
 
-From the output we know that the baseline category for our binary response is `more`. Meaning that Estimates from the logistic regression model represent a shift on the log-odds scale for `more` compared to the baseline response.
+可能要加一下conclusion
 
-```{r log_odds, warning=FALSE, message=FALSE}
-#log_odds
-modcoefs <- round(coef(model_4), 2)
-confint(model_4) %>%
-  kable()
-```
+## Further extension
 
-$$\ln(\displaystyle\frac{p}{1-p})=\alpha+\beta_{1}x_{i}+ \beta_{2}\textrm{depth}+ \beta_{3} \textrm{depth}$$ ,where $x_{i}$ is the ith category.
-
-```{r, warning=FALSE, message=FALSE}
-plot_model(model_4, show.values = TRUE, transform = NULL,
-           title = "Log-Odds_attach", show.p = FALSE)
-```
-
-```{r odds, warning=FALSE, message=FALSE}
-#odds
-model_4 %>%
-  coef() %>%
-  exp()
-```
-
-$\displaystyle\frac{p}{1-p}=exp(\alpha+\beta_{1}x_{i}+ \beta_{2}\textrm{depth}+ \beta_{3} \textrm{depth})$ ,where $x_{i}$ is the ith category.
-
-```{r, warning=FALSE, message=FALSE}
-plot_model(model_4, show.values = TRUE, axis.lim = c(1,1.5),
-           title = "Odds (less)", show.p = FALSE)
-```
-
-```{r probability, warning=FALSE, message=FALSE}
-
-```
+For the further extension, we could check the GLMs' model assumtion , to see if the model really fits well. Also could use other method to detect all the models that seems to fit well from the formal analysis, which one will perform the best of the model.
