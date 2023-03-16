@@ -183,35 +183,25 @@ group21_new %>%
   adorn_ns() # To show original counts
 ```
 
-```{r barplot1, warning=FALSE, message=FALSE, fig.cap="\\label{bar1:Newprice} Boxplot of newprice by categorical vairalbes(category)"}
+```{r barplot, warning=FALSE, message=FALSE, fig.cap="\\label{bar:Newprice} Boxplot of newprice by categorical vairalbes(category)"}
 #Barplot
 bar1<-ggplot()+ 
   geom_bar(data =group21_new,
            aes(x = factor(category),fill = factor(newprice)),
            position = "fill")
-bar1
-```
 
-Figure \ref{bar1:Newprice}
-
-```{r barplot2, warning=FALSE, message=FALSE, fig.cap="\\label{bar2:Newprice} Boxplot of newprice by categorical vairalbes(sellable_online)"}
 bar2<-ggplot()+ 
   geom_bar(data=group21_new,
            aes(x=factor(sellable_online),fill = factor(newprice)),
            position="fill")
-bar2
-```
 
-Figure \ref{bar2:Newprice}
-
-```{r barplot3, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice} Boxplot of newprice by categorical vairalbes(other_colors)"}
 bar3<-ggplot()+ 
   geom_bar(data =group21_new,
            aes(x = factor(other_colors),fill = factor(newprice)),
            position = "fill")
+grid.arrange(bar1,bar2,bar3,nrow=3)
 ```
-
-Figure \ref{bar3:Newprice}
+Figure \ref{bar:Newprice}
 
 ## Formal Analysis
 
@@ -335,7 +325,7 @@ hl_7  #p=0.527>0.05, model_14 is fitted well.
 ```
 
 ## Conclusion
-要加一下conclusion
+
 ## Further extension
 
 For the further extension, we could check the GLMs' model assumtion , to see if the model really fits well. Also could use other method to detect all the models that seems to fit well from the formal analysis, to decide which one will perform the best from those models.
