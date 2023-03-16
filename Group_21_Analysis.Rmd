@@ -3,7 +3,6 @@ title: "Group_21_Analysis"
 author: "Group21"
 date: "2023-03-13"
 output: html_document
-encoding: UTF-16
 ---
 
 ```{r setup, include=FALSE}
@@ -25,9 +24,15 @@ library(sjPlot)
 library(stats)
 library(jtools)
 library(janitor)
+library(ggpubr)
+library(ResourceSelection)
+library(stats)
 
 #Read the data
-group21_new <- read.csv("/Users/meng/Group21/dataset21.csv")
+group21_new <- read.csv("https://raw.githubusercontent.com/ShiruYUan/DAS-Group-21/main/dataset21.csv")
+group21_new$sellable_online <- as.factor(group21_new$sellable_online)
+group21_new$category <- as.factor(group21_new$category)
+group21_new$other_colors <- as.factor(group21_new$other_colors)
 ```
 
 ## Introduction
@@ -36,9 +41,7 @@ group21_new <- read.csv("/Users/meng/Group21/dataset21.csv")
 
 Our data in this case is about furniture in IKEA Saudi Arabia.
 
-Features are as below:
-
--   item_id -- Unique item ID for item of furniture
+The Features we picked are as below:
 
 -   category -- The furniture category the item belongs to
 
@@ -58,7 +61,7 @@ Features are as below:
 
 Before analysing the data, we do the data preprocessing. In this part, we choose to use variable's median to replace its missing value to get our final dataset.
 
-```{r group21_new, warning=FALSE, message=FALSE}
+```{r group21_new, warning=FALSE, message=FALSE, include=FALSE}
 #Calculates the column median, replacing the missing value with the median
 median_depth<- median(group21_new$depth,na.rm = TRUE)
 median_depth
@@ -74,7 +77,7 @@ median_width
 group21_new <- group21_new %>%
   mutate(width = ifelse(is.na(width), median_width, width))
 
-#Final dataset
+# final dataset
 W <- rep(0,500)
 group21_new$newprice <- W
 group21_new$newprice[group21_new$price>1000]=1
@@ -83,14 +86,42 @@ group21_new <- group21_new %>%
 
 group21_new
 dim(group21_new)
-View(group21_new)
 sum(is.na(group21_new))
+```
 
+```{r colinearityNumeric, warning=FALSE, message=FALSE,fig.cap="\\label{cor:numerical}colinearity in numerical variables"}
+#To see if there is colinearity in the numerical variables
+ggpairs(group21_new,columns = c(4:6), title = "Correlation bewteen numerical variables")
+```
+
+Figure \ref{cor:numerical} shows that, there's weak relationship between `height` and `depth`(0.019), mild relationship between `width` and `depth`(0.362) and moderate relationship between `width` and `height`(0.402).
+
+```{r scaledata, warning=FALSE, message=FALSE,include=False}
+round(diag(var(group21_new[,4:6])),2) ##significant difference variance
+group21_new$depth <- scale(group21_new$depth,center=TRUE, scale=TRUE)
+group21_new$height <- scale(group21_new$height,center=TRUE, scale=TRUE)
+group21_new$width <- scale(group21_new$width,center=TRUE, scale=TRUE)
+```
+
+Then we use chi-square test to check if there is colinearity in the three categorical variables
+
+```{r colinearitycategorical, warning=FALSE, message=FALSE,fig.cap="\\label{cor:categorical}colinearity in categorical variables"}
+table_variable_1 <- table(group21_new$category, group21_new$sellable_online)
+chisq_result_1 <- chisq.test(table_variable_1)
+chisq_result_1 #p-value>0.05, we do not reject H0 and there is no colinearity between category and sellable_online.
+table_variable_2 <- table(group21_new$category, group21_new$other_colors)
+chisq_result__2 <- chisq.test(table_variable_2)
+chisq_result__2#p-value<0.05, we reject H0 and there is colinearity between category and other_colors.
+table_variable_3 <- table(group21_new$other_colors, group21_new$sellable_online)
+chisq_result_3 <- chisq.test(table_variable_3)
+chisq_result_3#p-value>0.05, we do not reject H0 and there is no colinearity between other_colors and sellable_online.
+```
+
+From the output above, collinearity only happens between `category` and `other_colors`, but not between other categorical variables.
+
+```{r, warning=FALSE, message=FALSE,include=FALSE}
 group21_new$newprice <- as.factor(group21_new$newprice)
 levels(group21_new$newprice) <- c("more", "less")
-group21_new$sellable_online <- as.factor(group21_new$sellable_online)
-group21_new$category <- as.factor(group21_new$category)
-group21_new$other_colors <- as.factor(group21_new$other_colors)
 ```
 
 ## Explanatory Analysis
@@ -103,30 +134,28 @@ group21_new%>%
   skim()
 ```
 
-From the chart shows that the mean `depth` is 50.5, the mean `height` is 96.6, the mean `width` is 97.7 and the mean `price` is 991. Also, the middle 50% of the data for `depth` lies between 42 and 50, the middle 50% of `height` lies between 74 and 96.2, the middle 50% of `width` lies between 60 and 120 and the middle 50% of `price` lies between 169 and 1245.
-
 ### Boxplot
 
-A Boxplot is used here to find relationship between `newprice` and numeric variables.
+A Boxplot is used here to find relationship between our response variable `newprice` and numeric variables.
 
 ```{r boxplot, warning=FALSE, message=FALSE, fig.cap="\\label{box:Newprice} boxplot of newprice by numeric vairalbes"}
 #Boxplot
-b1<-ggplot(data = group21_new, aes(x = newprice, y = depth , fill = newprice))+
+box1<-ggplot(data = group21_new, aes(x = newprice, y = depth , fill = newprice))+
   geom_boxplot() +
-  labs(x = "More or Less", y = "Depth", title = "Plot1:Newprice by depth")+ 
+  labs(x = "More or less", y = "Depth")+ 
   theme(legend.position = "none")
 
-b2<-ggplot(data = group21_new, aes(x = newprice, y = height , fill = newprice))+
+box2<-ggplot(data = group21_new, aes(x = newprice, y = height , fill = newprice))+
   geom_boxplot() +
-  labs(x = "More or Less", y = "Height", title = "Plot2:Newprice by height")+ 
+  labs(x = "More or less", y = "Height")+ 
   theme(legend.position = "none")
 
-b3<-ggplot(data = group21_new, aes(x = newprice, y = width , fill = newprice))+
+box3<-ggplot(data = group21_new, aes(x = newprice, y = width , fill = newprice))+
   geom_boxplot() +
-  labs(x = "More or Less", y = "Width",title = "Plot3:Newprice by width")+ 
+  labs(x = "More or less", y = "Width")+ 
   theme(legend.position = "none")
 
-grid.arrange(b1, b2,b3, ncol=3)
+grid.arrange(box1, box2,box3, ncol=3)
 ```
 
 Figure \ref{box:Newprice}, shows three different variables (`depth`, `height`, `width`) in `newprice`. It can be told that there is more difference in Plot3 between `newprice` and `width`, meaning the `width` will influence the price more than other two variables.
@@ -135,99 +164,170 @@ Figure \ref{box:Newprice}, shows three different variables (`depth`, `height`, `
 
 A barplot is here used to determine the connection between categorical factors and the newprice.
 
-```{r barplot1, warning=FALSE, message=FALSE, fig.cap="\\label{bar1:Newprice} boxplot of newprice by categorical vairalbes"}
-#Barplot
+```{r proportion, warning=FALSE, message=FALSE, include=FALSE}
+#the proportion and barplots(categorical variables)
 group21_new %>%
   tabyl(newprice, category) %>%
   adorn_percentages() %>%
   adorn_pct_formatting() %>%
-  adorn_ns() # To show original counts
-bar1<-ggplot(data = group21_new, aes(x = newprice, group = category)) +
-  geom_bar(aes(y = after_stat(prop), fill = category), stat = "count", position = "dodge") +
-  labs(x = "More or Less", y = "Proportion")
-bar1
-```
-Figure \ref{bar1:Newprice}
+  adorn_ns()
 
-```{r barplot2, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice} boxplot of newprice by categorical vairalbes"}
 group21_new %>%
-  tabyl(newprice, sellable_online) %>%
+  tabyl(sellable_online, newprice) %>%
   adorn_percentages() %>%
   adorn_pct_formatting() %>%
   adorn_ns() # To show original counts
-bar2<-ggplot(data = group21_new, aes(x = newprice, group = sellable_online)) +
-  geom_bar(aes(y = after_stat(prop), fill = sellable_online), stat = "count", position = "dodge") +
-  labs(x = "More or Less", y = "Proportion")
-bar2
-```
-Figure \ref{bar2:Newprice}
 
-```{r barplot3, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice} boxplot of newprice by categorical vairalbes"}
 group21_new %>%
-  tabyl(newprice, other_colors) %>%
+  tabyl(other_colors, newprice) %>%
   adorn_percentages() %>%
   adorn_pct_formatting() %>%
   adorn_ns() # To show original counts
-bar3<-ggplot(data = group21_new, aes(x = newprice, group = other_colors)) +
-  geom_bar(aes(y = after_stat(prop), fill = other_colors), stat = "count", position = "dodge") +
-  labs(x = "More or Less", y = "Proportion")
-bar3
 ```
-Figure \ref{bar3:Newprice}
+
+```{r barplot, warning=FALSE, message=FALSE, fig.cap="\\label{bar:Newprice} boxplot of newprice by categorical vairalbes"}
+#Barplot
+bar1<-ggplot()+ 
+  geom_bar(data =group21_new,
+           aes(x = factor(category),fill = factor(newprice)),
+           position = "fill")
+bar2<-ggplot()+ 
+  geom_bar(data=group21_new,
+           aes(x=factor(sellable_online),fill = factor(newprice)),
+           position="fill")
+bar3<-ggplot()+ 
+  geom_bar(data =group21_new,
+           aes(x = factor(other_colors),fill = factor(newprice)),
+           position = "fill")
+grid.arrange(bar1,bar2,bar3,nrow=3)
+```
+
+Figure \ref{bar:Newprice}
 
 ## Formal Analysis
 
-In this part we first use the model selection method to pick the our best fitted model:
+In this part we first use the model selection method to pick the our best fitted model from the full model:
 
 ```{r model selection, warning=FALSE, message=FALSE}
 #Fit a GLM with all variables
-model_1<- glm(newprice ~ category+sellable_online+other_colors+depth+height+width, data = group21_new, family = binomial(link = "logit"))
+model_1 <- glm(newprice ~ category+sellable_online+depth+height+width, data = group21_new,
+               family = binomial(link = "logit"))
+
 #Use stepwise selection to select the most important variables
-step_model<- step(model_1,direction = "both")
+step_model_1 <- step(model_1,direction = "both")#model selection(AIC value)
 ```
 
 Based on model selection above, the model `newprice~category+height+width` with smallest AIC=366.61 is the best fitted model.
 
-There is a categorical variables, `category`, is the model, in order to check which category fits the model well, p-value is checked below.
-
-```{r model, warning=FALSE, message=FALSE}
+```{r bestmodel, warning=FALSE, message=FALSE}
 #Based on AIC pick the best model 
 model_2 <- glm(newprice ~ category+height+width, data = group21_new,
                family = binomial(link = "logit"))
-model_2 %>%
-  summary()
 
-#omit the variables by checking p-value
-data_1 <- filter(group21_new, category!="Caf\xe9 furniture")
-data_2 <- filter(data_1, category!="Chairs")
-data_3 <- filter(data_2, category!="Chests of drawers & drawer units")
-data_4 <- filter(data_3, category!="Children's furniture")
-data_5 <- filter(data_4, category!="Nursery furniture")
-data_6 <- filter(data_5, category!="Outdoor furniture")
-data_7 <- filter(data_6, category!="Room dividers")
-data_8 <- filter(data_7, category!="Sideboards, buffets & console tables")
-data_9 <- filter(data_8, category!="Sofas & armchairs")
-data_10 <- filter(data_9, category!="Tables & desks")
-data_11 <- filter(data_10, category!="Trolleys")
-
-model_3 <- glm(newprice ~ category+height+width, data = data_11,
-               family = binomial(link = "logit"))
-model_3 %>%
-  summary()
-
-data_12 <- filter(data_11, category!="Beds")
-model_4 <- glm(newprice ~ category+height+width, data = data_12,
-               family = binomial(link = "logit"))
-summ(model_4)
+#HLtest
+hl_1 <- hoslem.test(group21_new$newprice, fitted(model_2), g=10)
+hl_1 #p=2.313e-05<0.05, model_2 is not fitted well.
 ```
 
-After filtering data by p-value, our final best fitted model is `newprice ~ category+height+width`, with only combining category with `Bookcases & shelving units`, `Cabinets & cupboards`, `TV & media furniture` and `Wardrobes`.
+By checking the p-value from HL test, we can know that this model doesn't fit well.
+
+Since `category` and `other_colors` are not independent, so next part we remove the `category` variable from the full model and use AIC to check it again.
+
+```{r removeCategory, warning=FALSE, message=FALSE}
+model_3 <- glm(newprice ~ sellable_online+other_colors+depth+height+width, data = group21_new,
+               family = binomial(link = "logit"))
+
+step_model_3 <- step(model_3,direction = "both")
+
+model_4 <- glm(newprice ~ sellable_online+depth+height+width, data = group21_new,
+               family = binomial(link = "logit"))
+#HLtest
+hl_2 <- hoslem.test(group21_new$newprice, fitted(model_4), g=10)
+hl_2  #p=0.000146<0.05, model_4 is not fitted well.
+```
+
+From the smallest AIC(434.4), we can tell that `other_color` won't influence the model, so we could remove it from the model. However, from the p-value of the HL test, our this model doesn't fit well as well.
+
+Then we want to in the complexity to our model.
+
+```{r Widecomplexity,warning=FALSE, message=FALSE}
+model_5 <- glm(newprice ~ category+sellable_online+depth+height+width+I(depth^2)+I(depth^3), data = group21_new,
+               family = binomial(link = "logit"))
+
+step_model_4<- step(model_5,direction = "both")
+
+model_6 <- glm(newprice ~ category + height + width + I(depth^2), data = group21_new,
+               family = binomial(link = "logit"))
+
+#HLtest
+hl_3 <- hoslem.test(group21_new$newprice, fitted(model_6), g=10)
+hl_3  #p=0.0005213<0.05, model_6 is not fitted well.
+```
+
+```{r Heightcomplexity, warning=FALSE, message=FALSE}
+model_7 <- glm(newprice ~ category+sellable_online+depth+height+width+I(height^2)+I(height^3), data = group21_new,
+               family = binomial(link = "logit"))
+
+step_model_5<- step(model_7,direction = "both")
+
+model_8 <- glm(newprice ~ category + depth + height + width + I(height^3), data = group21_new,
+               family = binomial(link = "logit"))
+
+#HLtest
+hl_4 <- hoslem.test(group21_new$newprice, fitted(model_8), g=10)
+hl_4  #p=0.001637<0.05, model_8 is not fitted well.
+```
+
+```{r increaseWide3, warning=FALSE, message=FALSE}
+##wide^3
+model_9<- glm(newprice ~ category+sellable_online+depth+height+width+I(width^2)+I(width^3), data = group21_new,
+              family = binomial(link = "logit"))
+
+step_model_6<- step(model_9,direction = "both")
+
+model_10 <- glm(newprice ~ category + height + width + I(width^2) + I(width^3), data = group21_new,
+                family = binomial(link = "logit"))
+
+#HLtest
+hl_5 <- hoslem.test(group21_new$newprice, fitted(model_10), g=10)
+hl_5  #p=0.336>0.05, model_10 is fitted well.
+```
+
+```{r increaseWide4, warning=FALSE, message=FALSE}
+#wide^4
+model_11<- glm(newprice ~ category+sellable_online+depth+height+width+I(width^2)+I(width^3)+I(width^4), data = group21_new,
+               family = binomial(link = "logit"))
+
+step_model_7<- step(model_11,direction = "both")
+
+model_12 <- glm(newprice ~ category + depth + height + width + I(width^2) + I(width^3) +I(width^4), data = group21_new,
+                family = binomial(link = "logit"))
+
+#HLtest
+hl_6 <- hoslem.test(group21_new$newprice, fitted(model_12), g=10)
+hl_6  #p=0.5247>0.05,model_12 is fitted well
+```
+
+```{r increaseWide4Depth2, warning=FALSE, message=FALSE}
+#wide^4,depth^2
+model_13<- glm(newprice ~ category+sellable_online+depth+height+width+I(width^2)+I(width^3)+I(width^4)+I(depth^2), data = group21_new,
+               family = binomial(link = "logit"))
+
+step_model_8<- step(model_13,direction = "both")
+
+model_14 <- glm(newprice ~ category + height + width+I(width^2)+I(width^3)+I(width^4)+I(depth^2), data = group21_new,
+                family = binomial(link = "logit"))
+
+#HLtest
+hl_7 <- hoslem.test(group21_new$newprice, fitted(model_14), g=10)
+hl_7  #p=0.527>0.05, model_14 is fitted well.
+```
 
 ```{r baseline, warning=FALSE, message=FALSE}
 levels(data_12$newprice)
 ```
 
-From the result we know that the baseline category for our binary response is `more`. Meaning that Estimates from the logistic regression model represent a shift on the log-odds scale for `more` compared to the baseline response.
+From the output we know that the baseline category for our binary response is `more`. Meaning that Estimates from the logistic regression model represent a shift on the log-odds scale for `more` compared to the baseline response.
 
 ```{r log_odds, warning=FALSE, message=FALSE}
 #log_odds
