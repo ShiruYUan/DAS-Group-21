@@ -329,4 +329,4 @@ hl_7  #p=0.527>0.05, model_14 is fitted well.
 
 ## Further extension
 
-For the further extension, we could check the GLMs' model assumtion , to see if the model really fits well. Also could use other method to detect all the models that seems to fit well from the formal analysis, which one will perform the best of the model.
+For the further extension, we could check the GLMs' model assumtion , to see if the model really fits well. Also could use other method to detect all the models that seems to fit well from the formal analysis, to decide which one will perform the best from those models.
