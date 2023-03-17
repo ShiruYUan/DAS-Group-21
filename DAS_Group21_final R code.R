@@ -1,15 +1,3 @@
----
-title: "Group_21_Analysis"
-author: "group21"
-date: "2023-03-08"
-output: pdf_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r loadpackages/read data,echo=FALSE, warning=FALSE, message=FALSE}
 library(ggplot2)
 library(dplyr)
 library(moderndive)
@@ -25,15 +13,11 @@ library(stats)
 library(jtools)
 library(janitor)
 
-#Read the data
-group21_new <- read.csv("/Users/meng/Group21/dataset21.csv")
-```
 
-## Data preprocessing
+group21_new <- read.csv("C:/Users/DELL/Desktop/dataset21.csv")
 
-Before analysing the data, we do the data preprocessing. In this part, we choose to use variable's median to replace its missing value to get our final dataset.
 
-```{r group21_new, warning=FALSE, message=FALSE}
+
 #Calculates the column median, replacing the missing value with the median
 median_depth<- median(group21_new$depth,na.rm = TRUE)
 median_depth
@@ -49,7 +33,7 @@ median_width
 group21_new <- group21_new %>%
   mutate(width = ifelse(is.na(width), median_width, width))
 
-#Final dataset
+# final dataset
 W <- rep(0,500)
 group21_new$newprice <- W
 group21_new$newprice[group21_new$price>1000]=1
@@ -61,62 +45,35 @@ dim(group21_new)
 View(group21_new)
 sum(is.na(group21_new))
 
+####analysis
 group21_new$newprice <- as.factor(group21_new$newprice)
 levels(group21_new$newprice) <- c("more than", "no more than")
 group21_new$sellable_online <- as.factor(group21_new$sellable_online)
 group21_new$category <- as.factor(group21_new$category)
 group21_new$other_colors <- as.factor(group21_new$other_colors)
-```
 
-## Explanatory analysis
-
-### Summary statistic
-
-```{r summary, warning=FALSE, message=FALSE}
-#Summary statistic
-group21_new%>%
-  skim()
-```
-
-From the chart shows that the mean `depth` is 50.5, the mean `height` is 96.6, the mean `width` is 97.7 and the mean `price` is 991. Also, the middle 50% of the data for `depth` lies between 42 and 50, the middle 50% of `height` lies between 74 and 96.2, the middle 50% of `width` lies between 60 and 120 and the middle 50% of `price` lies between 169 and 1245.
-
-### Boxplot
-
-A Boxplot is used here to find relationship between `newprice` and numeric variables.
-
-```{r boxplot, warning=FALSE, message=FALSE, fig.cap="\\label{box:Newprice} boxplot of newprice by numeric vairalbes"}
-#Boxplot
-b1<-ggplot(data = group21_new, aes(x = newprice, y = depth , fill = newprice))+
+#boxplot
+ggplot(data = group21_new, aes(x = newprice, y = depth , fill = newprice))+
   geom_boxplot() +
-  labs(x = "More than 1000?", y = "Depth", title = "Plot1:Newprice by depth")+ 
+  labs(x = "More than 1000?", y = "Depth")+ 
   theme(legend.position = "none")
 
-b2<-ggplot(data = group21_new, aes(x = newprice, y = height , fill = newprice))+
+ggplot(data = group21_new, aes(x = newprice, y = height , fill = newprice))+
   geom_boxplot() +
-  labs(x = "More than 1000?", y = "Height", title = "Plot2:Newprice by height")+ 
+  labs(x = "More than 1000?", y = "Height")+ 
   theme(legend.position = "none")
 
-b3<-ggplot(data = group21_new, aes(x = newprice, y = width , fill = newprice))+
+ggplot(data = group21_new, aes(x = newprice, y = width , fill = newprice))+
   geom_boxplot() +
-  labs(x = "More than 1000?", y = "Width",title = "Plot3:Newprice by width")+ 
+  labs(x = "More than 1000?", y = "Width")+ 
   theme(legend.position = "none")
 
-grid.arrange(b1, b2,b3, ncol=3)
-```
-
-Figure \ref{box:Newprice}, shows three different variables (`depth`, `height`, `width`) in `newprice`. It can be tell that there is more difference in Plot3 between `newprice` and `width`, meaning the `width` will influence the price more than other two variables.
-
-### Barplot
-
-A barplot is here used to determine the connection between categorical factors and the newprice.
-
-```{r barplot, warning=FALSE, message=FALSE, fig.cap="\\label{bar:Newprice} boxplot of newprice by categorical vairalbes"}
-#Barplot
+#barplot
 group21_new %>%
   tabyl(category, newprice) %>%
   adorn_percentages() %>%
   adorn_pct_formatting() %>%
-  adorn_ns() # To show original counts
+  adorn_ns() # To show original counts,有点问题
 ggplot(data = group21_new, aes(x = newprice, group = category)) +
   geom_bar(aes(y = after_stat(prop), fill = category), stat = "count", position = "dodge") +
   labs(x = "More than 1000?", y = "Proportion")
@@ -139,29 +96,16 @@ group21_new %>%
 ggplot(data = group21_new, aes(x = newprice, group = other_colors)) +
   geom_bar(aes(y = after_stat(prop), fill = other_colors), stat = "count", position = "dodge") +
   labs(x = "More than 1000?", y = "Proportion")
-```
 
-Figure \ref{bar:Newprice}
+#model
+model_1 <- glm(newprice ~ category+sellable_online+other_colors+depth+height+width, data = group21_new,
+               family = binomial(link = "logit"))
+model_1 %>%
+  summary()
 
-## Formal Analysis
+step_model_1 <- step(model_1,direction = "both")
 
-In this part we first use the model selection method to pick the our best fitted model:
 
-```{r model selection, warning=FALSE, message=FALSE}
-#Fit a GLM with all variables
-model_1<- glm(newprice ~ category+sellable_online+other_colors+depth+height+width, data = group21_new,
-                   family = binomial(link = "logit"))
-#Use stepwise selection to select the most important variables
-step_model<- step(model_1,direction = "both")
-
-```
-
-Based on model selection above, the model `newprice~category+height+width` with smallest AIC=366.61 is the best fitted model.
-
-There is a categorical varialbes, `category`, is the model, in order to check which category fits the model well, p-value is checked below.
-
-```{r model, warning=FALSE, message=FALSE}
-#Based on AIC pick the best model 
 model_2 <- glm(newprice ~ category+height+width, data = group21_new,
                family = binomial(link = "logit"))
 model_2 %>%
@@ -169,7 +113,7 @@ model_2 %>%
 plot_model(model_2, show.values = TRUE, transform = NULL,
            title = "Log-Odds_attach", show.p = FALSE)
 
-#omit the variables by checking p-value
+
 data_1 <- filter(group21_new, category!="Caf\xe9 furniture")
 data_2 <- filter(data_1, category!="Chairs")
 data_3 <- filter(data_2, category!="Chests of drawers & drawer units")
@@ -192,15 +136,10 @@ model_4 <- glm(newprice ~ category+height+width, data = data_12,
                family = binomial(link = "logit"))
 model_4 %>%
   summary()
-```
-
-After filtering data by p-value, our final best fitted model is `newprice ~ category+height+width`, with only combining category with `Bookcases & shelving units`, `Cabinets & cupboards`, `TV & media furniture` and `Wardrobes`.
-
-```{r plot model, warning=FALSE, message=FALSE}
 plot_model(model_4, show.values = TRUE, transform = NULL,
            title = "Log-Odds_attach", show.p = FALSE)
 
 plot_model(model_4, show.values = TRUE,
            title = "", show.p = FALSE, value.offset = 0.25)
-```
 
+1
