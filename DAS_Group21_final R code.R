@@ -142,3 +142,4 @@ plot_model(model_4, show.values = TRUE, transform = NULL,
 plot_model(model_4, show.values = TRUE,
            title = "", show.p = FALSE, value.offset = 0.25)
 
+1
