@@ -88,6 +88,7 @@ group21_new$newprice[group21_new$price>1000]=1
 group21_new <- group21_new %>%
   select(category,sellable_online,other_colors,depth,height,width,price,newprice)
 
+
 group21_new
 dim(group21_new)
 sum(is.na(group21_new))
@@ -240,6 +241,9 @@ step_model_1 <- step(model_1,direction = "both")#model selection(AIC value)
 
 Based on model selection above, the model `newprice~category+height+width` with smallest AIC=366.61 is the best fitted model.
 
+```{r, warning=FALSE, message=FALSE, include=FALSE}
+group21_new$newprice<-as.numeric(group21_new$newprice)-1
+```
 ```{r bestmodel, warning=FALSE, message=FALSE}
 #Based on AIC pick the best model 
 model_2 <- glm(newprice ~ category+height+width, data = group21_new,
