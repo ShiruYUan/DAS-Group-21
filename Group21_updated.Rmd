@@ -63,7 +63,7 @@ The Features we picked are as below:
 
 # Data preprocessing 
 
-Before analysing the data, we do the data preprocessing. In this part, we choose to use variable's median to replace its missing value to get our final dataset.
+Before analysing the data, we do the data preprocessing. In this part, we choose to use variables' median to replace its missing value to get our final dataset.
 
 ```{r group21_new, warning=FALSE, message=FALSE, include=FALSE}
 #Calculates the column median, replacing the missing value with the median
