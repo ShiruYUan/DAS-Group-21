@@ -96,7 +96,12 @@ dim(group21_new)
 sum(is.na(group21_new))
 ```
 
-```{r colinearityNumeric, warning=FALSE, message=FALSE,fig.cap="\\label{cor:numerical}Correlation in numerical variables", fig.width=3, fig.width=5}
+```{r export,warning=FALSE, message=FALSE, include=FALSE, eval=FALSE}
+#export group21_new dataset
+write.csv(group21_new,"/Users/meng/Desktop/group21_new.csv")
+```
+
+```{r colinearityNumeric, warning=FALSE, message=FALSE,fig.cap="\\label{cor:numerical}Correlation in numerical variables", fig.width=5, fig.height=5}
 #To see if there is colinearity in the numerical variables
 ggpairs(group21_new,columns = c(4:6), title = "Correlation between numerical variables",)
 ```
@@ -148,7 +153,7 @@ The above summary of the four groups of variables shows that their maximum value
 
 A Boxplot is used here to find the relationship between our response variable `newprice` and numeric variables.
 
-```{r boxplot, warning=FALSE, message=FALSE, fig.cap="\\label{box:Newprice} Boxplot of newprice by numeric vairalbes"}
+```{r boxplot, warning=FALSE, message=FALSE, fig.cap="\\label{box:Newprice} Boxplot of newprice by numeric vairalbes", fig.width=5, fig.height=3}
 #Boxplot
 box1<-ggplot(data = group21_new, aes(x = newprice, y = depth , fill = newprice))+
   geom_boxplot() +
@@ -167,13 +172,14 @@ box3<-ggplot(data = group21_new, aes(x = newprice, y = width , fill = newprice))
 grid.arrange(box1,box2,box3,ncol=3)
 ```
 
+\newpage
 Figure \ref{box:Newprice} shows three different variables (`depth`, `height`, `width`) in `newprice`. It can be said that there is more difference in Plot 3 between `newprice` and `width`, meaning the `width` will influence the price more than the other two variables.
 
 ### Barplot
 
 A barplot is here used to determine the connection between categorical factors and the newprice.
 
-```{r proportion, warning=FALSE, message=FALSE}
+```{r proportion, warning=FALSE, message=FALSE, include=FALSE}
 #the proportion and barplots(categorical variables)
 group21_new %>%
   tabyl(newprice, category) %>%
@@ -194,19 +200,27 @@ group21_new %>%
   adorn_ns() # To show original counts
 ```
 
-```{r barplot1, warning=FALSE, message=FALSE, fig.cap="\\label{bar1:Newprice}Boxplot of newprice by categorical vairalbes(category)"}
+```{r barplot1, warning=FALSE, message=FALSE, fig.cap="\\label{bar1:Newprice}Boxplot of newprice by categorical vairalbes(category)", fig.width=20, fig.height=10}
 #Barplot
 bar1<-ggplot()+ 
   geom_bar(data =group21_new,
            aes(x = factor(category),fill = factor(newprice)),
            position = "fill")+
-  labs(x = "category", y = "newprice")
+  labs(x = "category", y = "newprice")+
+  theme(axis.text.x = element_text(angle = 25, hjust = 1,size = 20),
+        axis.text.y = element_text(size = 20),
+        axis.title.x = element_text(size = 25),
+        axis.title.y = element_text(size = 25),
+        legend.key.size = unit(2, "cm"),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 20))
 bar1
 ```
 
+\newpage
 Figure \ref{bar1:Newprice}, for all categories of furniture, the proportion of most of the "less" is less than 0.5, indicating that the ratio of more than 1000 Saudi Riyals exceeds the balance of less than 1000 Saudi Riyals in almost all furniture, so there is no apparent connection between `category` and our dependent variable `new_price`, and for our analysis, `category` is not a representative variable of whether there is an association between `category` and greater than 1000 Saudi Riyals.
 
-```{r barplot2, warning=FALSE, message=FALSE, fig.cap="\\label{bar2:Newprice}Boxplot of newprice by categorical vairalbes(sellable_online)"}
+```{r barplot2, warning=FALSE, message=FALSE, fig.cap="\\label{bar2:Newprice}Boxplot of newprice by categorical vairalbes(sellable_online)", fig.width=5, fig.height=2.5}
 bar2<-ggplot()+ 
   geom_bar(data=group21_new,
            aes(x=factor(sellable_online),fill = factor(newprice)),
@@ -215,9 +229,9 @@ bar2<-ggplot()+
 bar2
 ```
 
-Figure \ref{bar2:Newprice},in the "false" part of the above chart, there are no furniture items larger than 1000 Saudi Riyals, which means that all furniture items not sold online are smaller than 1000 Saudi Riyals. Therefore, using `sellable_online` as the independent variable cannot be entirely explained by the relationship with `new_price`.
+Figure \ref{bar2:Newprice}, in the "false" part of the above chart, there are no furniture items larger than 1000 Saudi Riyals, which means that all furniture items not sold online are smaller than 1000 Saudi Riyals. Therefore, using `sellable_online` as the independent variable cannot be entirely explained by the relationship with `new_price`.
 
-```{r barplot3, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice}Boxplot of newprice by categorical vairalbes(other_colors)"}
+```{r barplot3, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice}Boxplot of newprice by categorical vairalbes(other_colors)", fig.width=5, fig.height=2.5}
 bar3<-ggplot()+ 
   geom_bar(data =group21_new,
            aes(x = factor(other_colors),fill = factor(newprice)),
@@ -280,7 +294,7 @@ From the smallest AIC(434.4), we can tell that `other_color` won't influence the
 
 Then we want to increase the complexity to our model.
 
-```{r Widecomplexity,warning=FALSE, message=FALSE}
+```{r WidecomplexityHL,warning=FALSE, message=FALSE, include=FALSE}
 model_5 <- glm(newprice ~ category+sellable_online+depth+height+width+I(depth^2)+I(depth^3),
                data = group21_new, family = binomial(link = "logit"))
 
@@ -289,13 +303,16 @@ step_model_4<- step(model_5,direction = "both")
 
 model_6 <- glm(newprice ~ category + height + width + I(depth^2), data = group21_new,
                family = binomial(link = "logit"))
-
+```
+```{r Widecomplexity,warning=FALSE, message=FALSE}
+#best model from model_5 (AIC=366.49)
+model_6$call
 #HLtest
 hl_3 <- hoslem.test(group21_new$newprice, fitted(model_6), g=10)
 hl_3  #p=0.0005213<0.05, model_6 is not fitted well.
 ```
 
-```{r Heightcomplexity, warning=FALSE, message=FALSE}
+```{r Heightcomplexity, warning=FALSE, message=FALSE, include=FALSE}
 model_7 <- glm(newprice ~ category+sellable_online+depth+height+width+I(height^2)
                +I(height^3), data = group21_new, family = binomial(link = "logit"))
 
@@ -303,13 +320,16 @@ step_model_5<- step(model_7,direction = "both")
 
 model_8 <- glm(newprice ~ category + depth + height + width + I(height^3),
                data = group21_new, family = binomial(link = "logit"))
-
+```
+```{r HeightcomplexityHL, warning=FALSE, message=FALSE}
+#best model from model_7 (AIC=366.52)
+model_8$call
 #HLtest
 hl_4 <- hoslem.test(group21_new$newprice, fitted(model_8), g=10)
 hl_4  #p=0.001637<0.05, model_8 is not fitted well.
 ```
 
-```{r increaseWide3, warning=FALSE, message=FALSE}
+```{r increaseWide3, warning=FALSE, message=FALSE, include=FALSE}
 ##wide^3
 model_9<- glm(newprice ~ category+sellable_online+depth+height+width+I(width^2)+I(width^3),
               data = group21_new, family = binomial(link = "logit"))
@@ -318,13 +338,16 @@ step_model_6<- step(model_9,direction = "both")
 
 model_10 <- glm(newprice ~ category + height + width + I(width^2) + I(width^3),
                 data = group21_new, family = binomial(link = "logit"))
-
+```
+```{r increaseWide3HL, warning=FALSE, message=FALSE}
+#best model from model_9 (AIC=361.53)
+model_10$call
 #HLtest
 hl_5 <- hoslem.test(group21_new$newprice, fitted(model_10), g=10)
 hl_5  #p=0.336>0.05, model_10 is fitted well.
 ```
 
-```{r increaseWide4, warning=FALSE, message=FALSE}
+```{r increaseWide4, warning=FALSE, message=FALSE, include=FALSE}
 #wide^4
 model_11<- glm(newprice ~ category+sellable_online+depth+height+width+I(width^2)
                +I(width^3)+I(width^4), data = group21_new, family = binomial(link = "logit"))
@@ -333,13 +356,16 @@ step_model_7<- step(model_11,direction = "both")
 
 model_12 <- glm(newprice ~ category + depth + height + width + I(width^2) + I(width^3)
                 +I(width^4), data = group21_new, family = binomial(link = "logit"))
-
+```
+```{r increaseWide4HL, warning=FALSE, message=FALSE}
+#best model from model_11 (AIC=354.19)
+model_12$call
 #HLtest
 hl_6 <- hoslem.test(group21_new$newprice, fitted(model_12), g=10)
 hl_6  #p=0.5247>0.05,model_12 is fitted well
 ```
 
-```{r increaseWide4Depth2, warning=FALSE, message=FALSE}
+```{r increaseWide4Depth2, warning=FALSE, message=FALSE, include=FALSE}
 #wide^4,depth^2
 model_13<- glm(newprice ~ category+sellable_online+depth+height+width+I(width^2)
                +I(width^3)+I(width^4)+I(depth^2),
@@ -349,7 +375,10 @@ step_model_8<- step(model_13,direction = "both")
 
 model_14 <- glm(newprice ~ category + height + width+I(width^2)+I(width^3)+I(width^4)
                 +I(depth^2), data = group21_new, family = binomial(link = "logit"))
-
+```
+```{r increaseWide4Depth2HL, warning=FALSE, message=FALSE}
+#best model from model_13 (AIC=354.12)
+model_14$call
 #HLtest
 hl_7 <- hoslem.test(group21_new$newprice, fitted(model_14), g=10)
 hl_7  #p=0.527>0.05, model_14 is fitted well.
