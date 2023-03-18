@@ -101,9 +101,12 @@ sum(is.na(group21_new))
 write.csv(group21_new,"/Users/meng/Desktop/group21_new.csv")
 ```
 
-```{r colinearityNumeric, warning=FALSE, message=FALSE,fig.cap="\\label{cor:numerical}Correlation in numerical variables", fig.width=5, fig.height=5}
+```{r colinearityNumeric, warning=FALSE, message=FALSE,fig.cap="\\label{cor:numerical}Correlation in numerical variables", fig.width=4, fig.height=4}
 #To see if there is colinearity in the numerical variables
-ggpairs(group21_new,columns = c(4:6), title = "Correlation between numerical variables",)
+ggpairs(group21_new,columns = c(4:6), title = "Correlation between numerical variables")+
+  theme(axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8),
+        plot.title = element_text(size=10))
 ```
 
 Figure \ref{cor:numerical} shows that there's a weak relationship between `height` and `depth`(0.019), a mild relationship between `width` and `depth`(0.362) and a moderate relationship between `width` and `height`(0.402)
@@ -115,7 +118,7 @@ group21_new$height <- scale(group21_new$height,center=TRUE, scale=TRUE)
 group21_new$width <- scale(group21_new$width,center=TRUE, scale=TRUE)
 ```
 
-Based on the result above, we conclude that there is minimal variation between the `depth` of the different products in the data set, with more significant variation in the `height`. Still, the tremendous variation is in the `width` between the products. In other words, the table above means that the `depth` distribution is the smallest, followed by the `height`, and the `width` distribution is the largest. Finally, even the slightest `depth` variation has an enormous value, so we use the scale function below to normalize the data.
+Based on the result above, we conclude that there is minimal variation between the `depth` of the different products in the data set, with more significant variation in the `height`. Still, the tremendous variation is in the `width` between the products. In other words, the table above means that the `depth` distribution is the smallest, followed by the `height`, and the `width` distribution is the largest. Finally, even the slightest `depth` variation has an enormous value, so we use the scale function to normalize the data.
 
 Then we use chi-square test to check if there is co-linearity in the three categorical variables
 
@@ -209,11 +212,11 @@ bar1<-ggplot()+
   labs(x = "category", y = "newprice")+
   theme(axis.text.x = element_text(angle = 25, hjust = 1,size = 20),
         axis.text.y = element_text(size = 20),
-        axis.title.x = element_text(size = 25),
-        axis.title.y = element_text(size = 25),
-        legend.key.size = unit(2, "cm"),
-        legend.text = element_text(size = 20),
-        legend.title = element_text(size = 20))
+        axis.title.x = element_text(size = 30),
+        axis.title.y = element_text(size = 30),
+        legend.key.size = unit(5, "mm"),
+        legend.text = element_text(size = 25),
+        legend.title = element_text(size = 25))
 bar1
 ```
 
@@ -225,7 +228,12 @@ bar2<-ggplot()+
   geom_bar(data=group21_new,
            aes(x=factor(sellable_online),fill = factor(newprice)),
            position="fill")+
-  labs(x = "sellable_online", y = "newprice")
+  labs(x = "sellable_online", y = "newprice")+
+  theme(axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        legend.key.size = unit(2, "mm"),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10))
 bar2
 ```
 
@@ -236,7 +244,12 @@ bar3<-ggplot()+
   geom_bar(data =group21_new,
            aes(x = factor(other_colors),fill = factor(newprice)),
            position = "fill")+
-  labs(x = "sellable_online", y = "newprice")
+  labs(x = "sellable_online", y = "newprice")+
+   theme(axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        legend.key.size = unit(2, "mm"),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10))
 
 bar3
 ```
@@ -281,7 +294,7 @@ model_3 <- glm(newprice ~ sellable_online+other_colors+depth+height+width,
                data = group21_new, family = binomial(link = "logit"))
 
 step_model_3 <- step(model_3,direction = "both")
-
+#smallest AIC from model_3
 model_4 <- glm(newprice ~ sellable_online+depth+height+width, data = group21_new,
                family = binomial(link = "logit"))
 
@@ -305,7 +318,9 @@ model_6 <- glm(newprice ~ category + height + width + I(depth^2), data = group21
                family = binomial(link = "logit"))
 ```
 ```{r Widecomplexity,warning=FALSE, message=FALSE}
-#best model from model_5 (AIC=366.49)
+#best model from
+#glm(newprice~category+sellable_online+depth+height+width+I(depth^2)+I(depth^3))
+#(AIC=366.49)
 model_6$call
 #HLtest
 hl_3 <- hoslem.test(group21_new$newprice, fitted(model_6), g=10)
@@ -322,7 +337,9 @@ model_8 <- glm(newprice ~ category + depth + height + width + I(height^3),
                data = group21_new, family = binomial(link = "logit"))
 ```
 ```{r HeightcomplexityHL, warning=FALSE, message=FALSE}
-#best model from model_7 (AIC=366.52)
+#best model from 
+#glm(newprice ~ category+sellable_online+depth+height+width+I(height^2)+I(height^3))
+#(AIC=366.52)
 model_8$call
 #HLtest
 hl_4 <- hoslem.test(group21_new$newprice, fitted(model_8), g=10)
@@ -340,7 +357,9 @@ model_10 <- glm(newprice ~ category + height + width + I(width^2) + I(width^3),
                 data = group21_new, family = binomial(link = "logit"))
 ```
 ```{r increaseWide3HL, warning=FALSE, message=FALSE}
-#best model from model_9 (AIC=361.53)
+#best model from 
+#glm(newprice ~ category+sellable_online+depth+height+width+I(width^2)+I(width^3))
+#(AIC=361.53)
 model_10$call
 #HLtest
 hl_5 <- hoslem.test(group21_new$newprice, fitted(model_10), g=10)
@@ -358,7 +377,9 @@ model_12 <- glm(newprice ~ category + depth + height + width + I(width^2) + I(wi
                 +I(width^4), data = group21_new, family = binomial(link = "logit"))
 ```
 ```{r increaseWide4HL, warning=FALSE, message=FALSE}
-#best model from model_11 (AIC=354.19)
+#best model from 
+#glm(newprice ~ category+sellable_online+depth+height+width+I(width^2)+I(width^3)+I(width^4))
+#(AIC=354.19)
 model_12$call
 #HLtest
 hl_6 <- hoslem.test(group21_new$newprice, fitted(model_12), g=10)
