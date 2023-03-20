@@ -411,3 +411,5 @@ For the further extension, we could check the GLMs' model assumption , to see if
 # Reference
 
 <https://rdrr.io/cran/vcdExtra/man/HLtest.html>
+
+<https://search.r-project.org/CRAN/refmans/ResourceSelection/html/hoslem.test.html>
