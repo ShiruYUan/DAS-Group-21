@@ -418,3 +418,4 @@ For IKEA furniture larger than 1000 Saudi Riyals, `category` and `sellable_onlin
 # Further extension {#sec:fur}
 
 For the further extension, we could check the GLMs' model assumption , to see if the model really fits well. Also could use other method to detect all the models that seems to fit well from the formal analysis, to decide which one will perform the best from those models.
+
