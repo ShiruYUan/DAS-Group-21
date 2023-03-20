@@ -223,7 +223,7 @@ bar1
 
 \newpage
 
-Figure \ref{bar1:Newprice}, for all categories of furniture, the proportion of most of the "less" is less than 0.5, indicating that the ratio of more than 1000 Saudi Riyals exceeds the balance of less than 1000 Saudi Riyals in almost all furniture, so there is no apparent connection between `category` and our dependent variable `new_price`, and for our analysis, `category` is not a representative variable of whether there is an association between `category` and greater than 1000 Saudi Riyals.
+Figure \ref{bar1:Newprice}, for all categories of furniture, the proportion of most of the "less" is less than 0.5, indicating that the ratio of more than 1000 Saudi Riyals exceeds the balance of less than 1000 Saudi Riyals in almost all furniture, so there is no apparent connection between `category` and our dependent variable `new_price`, and for our analysis, `category` is not a representative variable of whether there is an association between `category` and greater than 1000 Saudi Riyals. There are four furniture groups with a single weighting, specifically, caf. Furniture, chests of drawers & drawer units, children's furniture and nursery furniture, all of which have a price greater than 1000 Saudi Riyals, but all tables of room dividers cost less than 1000 Saudi Riyals.
 
 ```{r barplot2, warning=FALSE, message=FALSE, fig.cap="\\label{bar2:Newprice}Boxplot of newprice by categorical variables(sellable_online)", fig.width=5, fig.height=2.5}
 bar2<-ggplot()+ 
@@ -256,7 +256,7 @@ bar3<-ggplot()+
 bar3
 ```
 
-Figure \ref{bar3:Newprice}, finally, the table above shows that `other_colors` have a certain percentage of Saudi Riyals, whether larger than 1000 or not, and the difference between the two groups is insignificant. Therefore, we can use `other_colors` as the central modelling premise.
+Figure \ref{bar3:Newprice}, finally, the table above shows that `other_colors` have a certain percentage of Saudi Riyals, whether larger than 1000 or not, and the difference between the two groups is insignificant. Therefore, we can use `other_colors` as the central modelling premise. Also, for `other_colors`, the `weight` of furniture over 1000 Saudi Riyals exceeds that of furniture under 1000 Saudi Riyals. On the contrary, for `sellable_online` furniture, the importance of less than 1000 Saudi Riyals is greater than that of more than 1000 Saudi Riyals.
 
 # Formal data analysis {#sec:fda}
 
