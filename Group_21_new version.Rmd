@@ -63,6 +63,7 @@ The Features we picked are as below:
 
 -   width -- width of the item in cm
 
+\newpage
 # Data preprocessing {#sec:pre}
 
 Before analysing the data, we do the data preprocessing. In this part, we choose to use the variables' median to replace its missing value to get our final dataset.
@@ -100,6 +101,15 @@ sum(is.na(group21_new))
 #export group21_new dataset
 write.csv(group21_new,"/Users/meng/Desktop/group21_new.csv")
 ```
+# Explanatory data Analysis {#sec:eda}
+
+### Summary statistics
+```{r summary, warning=FALSE, message=FALSE}
+#Summary statistic
+summary(group21_new)
+```
+
+The above summary of the four groups of variables shows that their maximum values differ significantly from the other data, so all four groups have outliers. And the central width portion is spread out furthest between three independent variables.
 
 ```{r colinearityNumeric, warning=FALSE, message=FALSE,fig.cap="\\label{cor:numerical}Correlation in numerical variables", fig.width=4, fig.height=4}
 #To see if there is colinearity in the numerical variables
@@ -110,7 +120,7 @@ ggpairs(group21_new,columns = c(4:6), title = "Correlation between numerical var
 ```
 
 Figure \ref{cor:numerical} shows that there's a weak relationship between `height` and `depth`(0.019), a mild relationship between `width` and `depth`(0.362) and a moderate relationship between `width` and `height`(0.402)
-
+\newpage
 ```{r scaledata, warning=FALSE, message=FALSE}
 round(diag(var(group21_new[,4:6])),2) ##significant difference variance
 group21_new$depth <- scale(group21_new$depth,center=TRUE, scale=TRUE)
@@ -141,17 +151,6 @@ group21_new$newprice <- as.factor(group21_new$newprice)
 levels(group21_new$newprice) <- c("more", "less")
 ```
 
-# Explanatory data Analysis {#sec:eda}
-
-### Summary statistics
-
-```{r summary, warning=FALSE, message=FALSE}
-#Summary statistic
-summary(group21_new)
-```
-
-The above summary of the four groups of variables shows that their maximum values differ significantly from the other data, so all four groups have outliers. And the central width portion is spread out furthest between three independent variables.
-
 ### Boxplot
 
 A Boxplot is used here to find the relationship between our response variable `newprice` and numeric variables.
@@ -175,7 +174,6 @@ box3<-ggplot(data = group21_new, aes(x = newprice, y = width , fill = newprice))
 grid.arrange(box1,box2,box3,ncol=3)
 ```
 
-\newpage
 Figure \ref{box:Newprice} shows three different variables (`depth`, `height`, `width`) in `newprice`. It can be said that there is more difference in Plot 3 between `newprice` and `width`, meaning the `width` will influence the price more than the other two variables.
 
 ### Barplot
@@ -238,13 +236,13 @@ bar2
 ```
 
 Figure \ref{bar2:Newprice}, in the "false" part of the above chart, there are no furniture items larger than 1000 Saudi Riyals, which means that all furniture items not sold online are smaller than 1000 Saudi Riyals. Therefore, using `sellable_online` as the independent variable cannot be entirely explained by the relationship with `new_price`.
-
+\newpage
 ```{r barplot3, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice}Boxplot of newprice by categorical varialbes(other_colors)", fig.width=5, fig.height=2.5}
 bar3<-ggplot()+ 
   geom_bar(data =group21_new,
            aes(x = factor(other_colors),fill = factor(newprice)),
            position = "fill")+
-  labs(x = "sellable_online", y = "newprice")+
+  labs(x = "other_colors", y = "newprice")+
    theme(axis.title.x = element_text(size = 10),
         axis.title.y = element_text(size = 10),
         legend.key.size = unit(2, "mm"),
