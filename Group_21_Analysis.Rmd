@@ -1,7 +1,7 @@
 ---
 title: "Group_21_Analysis"
 author: "Group21"
-date: "2023-03-20"
+date: "2023-03-16"
 output:
   pdf_document:
     number_sections: yes
@@ -64,6 +64,7 @@ The Features we picked are as below:
 -   width -- width of the item in cm
 
 \newpage
+
 # Data preprocessing {#sec:pre}
 
 Before analysing the data, we do the data preprocessing. In this part, we choose to use the variables' median to replace its missing value to get our final dataset.
@@ -101,9 +102,11 @@ sum(is.na(group21_new))
 #export group21_new dataset
 write.csv(group21_new,"/Users/meng/Desktop/group21_new.csv")
 ```
+
 # Explanatory data Analysis {#sec:eda}
 
 ### Summary statistics
+
 ```{r summary, warning=FALSE, message=FALSE}
 #Summary statistic
 summary(group21_new)
@@ -119,8 +122,8 @@ ggpairs(group21_new,columns = c(4:6), title = "Correlation between numerical var
         plot.title = element_text(size=10))
 ```
 
-Figure \ref{cor:numerical} shows that there's a weak relationship between `height` and `depth`(0.019), a mild relationship between `width` and `depth`(0.362) and a moderate relationship between `width` and `height`(0.402)
-\newpage
+Figure \ref{cor:numerical} shows that there's a weak relationship between `height` and `depth`(0.019), a mild relationship between `width` and `depth`(0.362) and a moderate relationship between `width` and `height`(0.402) \newpage
+
 ```{r scaledata, warning=FALSE, message=FALSE}
 round(diag(var(group21_new[,4:6])),2) ##significant difference variance
 group21_new$depth <- scale(group21_new$depth,center=TRUE, scale=TRUE)
@@ -219,6 +222,7 @@ bar1
 ```
 
 \newpage
+
 Figure \ref{bar1:Newprice}, for all categories of furniture, the proportion of most of the "less" is less than 0.5, indicating that the ratio of more than 1000 Saudi Riyals exceeds the balance of less than 1000 Saudi Riyals in almost all furniture, so there is no apparent connection between `category` and our dependent variable `new_price`, and for our analysis, `category` is not a representative variable of whether there is an association between `category` and greater than 1000 Saudi Riyals.
 
 ```{r barplot2, warning=FALSE, message=FALSE, fig.cap="\\label{bar2:Newprice}Boxplot of newprice by categorical varialbes(sellable_online)", fig.width=5, fig.height=2.5}
@@ -235,8 +239,8 @@ bar2<-ggplot()+
 bar2
 ```
 
-Figure \ref{bar2:Newprice}, in the "false" part of the above chart, there are no furniture items larger than 1000 Saudi Riyals, which means that all furniture items not sold online are smaller than 1000 Saudi Riyals. Therefore, using `sellable_online` as the independent variable cannot be entirely explained by the relationship with `new_price`.
-\newpage
+Figure \ref{bar2:Newprice}, in the "false" part of the above chart, there are no furniture items larger than 1000 Saudi Riyals, which means that all furniture items not sold online are smaller than 1000 Saudi Riyals. Therefore, using `sellable_online` as the independent variable cannot be entirely explained by the relationship with `new_price`. \newpage
+
 ```{r barplot3, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice}Boxplot of newprice by categorical varialbes(other_colors)", fig.width=5, fig.height=2.5}
 bar3<-ggplot()+ 
   geom_bar(data =group21_new,
@@ -256,7 +260,7 @@ Figure \ref{bar3:Newprice}, finally, the table above shows that `other_colors` h
 
 # Formal data analysis {#sec:fda}
 
-In this part we first use the model selection method to pick the our best fitted model from the full model:
+In this part we first use the model selection method to pick the our best fitted model. Since `category` and `other_colors` are not independent, and from \ref{box:Newprice}, `category` have more impact than `other_colors` so the initial model will be: `newprice ~ category+sellable_online+depth+height+width`
 
 ```{r model selection, warning=FALSE, message=FALSE}
 #Fit a GLM with all variables
@@ -285,24 +289,6 @@ hl_1 #p=2.313e-05<0.05, model_2 is not fitted well.
 
 By checking the p-value from HL test, we can know that this model doesn't fit well.
 
-Since `category` and `other_colors` are not independent, so next part we remove the `category` variable from the full model and use AIC to check it again.
-
-```{r removeCategory, warning=FALSE, message=FALSE}
-model_3 <- glm(newprice ~ sellable_online+other_colors+depth+height+width,
-               data = group21_new, family = binomial(link = "logit"))
-
-step_model_3 <- step(model_3,direction = "both")
-#smallest AIC from model_3
-model_4 <- glm(newprice ~ sellable_online+depth+height+width, data = group21_new,
-               family = binomial(link = "logit"))
-
-#HLtest
-hl_2 <- hoslem.test(group21_new$newprice, fitted(model_4), g=10)
-hl_2  #p=0.000146<0.05, model_4 is not fitted well.
-```
-
-From the smallest AIC(434.4), we can tell that `other_color` won't influence the model, so we could remove it from the model. However, from the p-value of the HL test, this model doesn't fit well as well.
-
 Then we want to increase the complexity to our model.
 
 ```{r WidecomplexityHL,warning=FALSE, message=FALSE, include=FALSE}
@@ -315,6 +301,7 @@ step_model_4<- step(model_5,direction = "both")
 model_6 <- glm(newprice ~ category + height + width + I(depth^2), data = group21_new,
                family = binomial(link = "logit"))
 ```
+
 ```{r Widecomplexity,warning=FALSE, message=FALSE}
 #best model from
 #glm(newprice~category+sellable_online+depth+height+width+I(depth^2)+I(depth^3))
@@ -334,6 +321,7 @@ step_model_5<- step(model_7,direction = "both")
 model_8 <- glm(newprice ~ category + depth + height + width + I(height^3),
                data = group21_new, family = binomial(link = "logit"))
 ```
+
 ```{r HeightcomplexityHL, warning=FALSE, message=FALSE}
 #best model from 
 #glm(newprice ~ category+sellable_online+depth+height+width+I(height^2)+I(height^3))
@@ -354,6 +342,7 @@ step_model_6<- step(model_9,direction = "both")
 model_10 <- glm(newprice ~ category + height + width + I(width^2) + I(width^3),
                 data = group21_new, family = binomial(link = "logit"))
 ```
+
 ```{r increaseWide3HL, warning=FALSE, message=FALSE}
 #best model from 
 #glm(newprice ~ category+sellable_online+depth+height+width+I(width^2)+I(width^3))
@@ -374,6 +363,7 @@ step_model_7<- step(model_11,direction = "both")
 model_12 <- glm(newprice ~ category + depth + height + width + I(width^2) + I(width^3)
                 +I(width^4), data = group21_new, family = binomial(link = "logit"))
 ```
+
 ```{r increaseWide4HL, warning=FALSE, message=FALSE}
 #best model from 
 #glm(newprice ~ category+sellable_online+depth+height+width+I(width^2)+I(width^3)+I(width^4))
@@ -395,6 +385,7 @@ step_model_8<- step(model_13,direction = "both")
 model_14 <- glm(newprice ~ category + height + width+I(width^2)+I(width^3)+I(width^4)
                 +I(depth^2), data = group21_new, family = binomial(link = "logit"))
 ```
+
 ```{r increaseWide4Depth2HL, warning=FALSE, message=FALSE}
 #best model from model_13 (AIC=354.12)
 model_14$call
@@ -417,3 +408,6 @@ For IKEA furniture larger than 1000 Saudi Riyals, `category` and `sellable_onlin
 
 For the further extension, we could check the GLMs' model assumption , to see if the model really fits well. Also could use other method to detect all the models that seems to fit well from the formal analysis, to decide which one will perform the best from those models.
 
+# Reference
+
+<https://rdrr.io/cran/vcdExtra/man/HLtest.html>
