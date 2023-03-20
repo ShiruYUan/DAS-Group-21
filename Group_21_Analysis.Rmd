@@ -29,6 +29,7 @@ library(janitor)
 library(ggpubr)
 library(ResourceSelection)
 library(stats)
+library(corrplot)
 
 #Read the data
 group21_new <- read.csv("https://raw.githubusercontent.com/ShiruYUan/DAS-Group-21/main/dataset21.csv")
@@ -63,16 +64,14 @@ The Features we picked are as below:
 
 -   width -- width of the item in cm
 
-\newpage
 
 # Data preprocessing {#sec:pre}
 
 Before analysing the data, we do the data preprocessing. In this part, we choose to use the variables' median to replace its missing value to get our final dataset.
 
-```{r group21_new, warning=FALSE, message=FALSE, include=FALSE}
+```{r median, warning=FALSE, message=FALSE}
 #Calculates the column median, replacing the missing value with the median
 median_depth<- median(group21_new$depth,na.rm = TRUE)
-median_depth
 group21_new <- group21_new %>%
   mutate(depth = ifelse(is.na(depth), median_depth, depth))
 
@@ -81,10 +80,10 @@ group21_new <- group21_new %>%
   mutate(height = ifelse(is.na(height), median_height, height))
 
 median_width <- median(group21_new$width,na.rm = TRUE)
-median_width
 group21_new <- group21_new %>%
   mutate(width = ifelse(is.na(width), median_width, width))
-
+```
+```{r group21_new, warning=FALSE, message=FALSE, include=FALSE}
 # final dataset
 W <- rep(0,500)
 group21_new$newprice <- W
@@ -97,8 +96,16 @@ group21_new
 dim(group21_new)
 sum(is.na(group21_new))
 ```
+```{r scaledata, warning=FALSE, message=FALSE}
+round(diag(var(group21_new[,4:6])),2) ##significant difference variance
+group21_new$depth <- scale(group21_new$depth,center=TRUE, scale=TRUE)
+group21_new$height <- scale(group21_new$height,center=TRUE, scale=TRUE)
+group21_new$width <- scale(group21_new$width,center=TRUE, scale=TRUE)
+```
 
-```{r export,warning=FALSE, message=FALSE, include=FALSE, eval=FALSE}
+Based on the result above, we conclude that there is minimal variation between the `depth` of the different products in the data set, with more significant variation in the `height`. Still, the tremendous variation is in the `width` between the products. In other words, the table above means that the `depth` distribution is the smallest, followed by the `height`, and the `width` distribution is the largest. Finally, even the slightest `depth` variation has an enormous value, so we use the scale function to normalize the data.
+
+```{r export,warning=FALSE, message=FALSE, include=FALSE}
 #export group21_new dataset
 write.csv(group21_new,"/Users/meng/Desktop/group21_new.csv")
 ```
@@ -114,24 +121,16 @@ summary(group21_new)
 
 The above summary of the four groups of variables shows that their maximum values differ significantly from the other data, so all four groups have outliers. And the central width portion is spread out furthest between three independent variables.
 
-```{r colinearityNumeric, warning=FALSE, message=FALSE,fig.cap="\\label{cor:numerical}Correlation in numerical variables", fig.width=4, fig.height=4}
+```{r colinearityNumeric, warning=FALSE, message=FALSE,fig.cap="\\label{cor:numerical}Correlation in numerical variables", fig.width=3.5, fig.height=3}
 #To see if there is colinearity in the numerical variables
-ggpairs(group21_new,columns = c(4:6), title = "Correlation between numerical variables")+
-  theme(axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8),
-        plot.title = element_text(size=10))
+group21_numeric<-group21_new %>%
+  select(depth,height,width)
+cor_matrix <- cor(group21_numeric) %>% #create the correlation matrix of variables
+  round(2)
+corrplot_ori<- corrplot(cor_matrix, method = "color", addCoef.col = "red",type = "upper")
 ```
 
-Figure \ref{cor:numerical} shows that there's a weak relationship between `height` and `depth`(0.019), a mild relationship between `width` and `depth`(0.362) and a moderate relationship between `width` and `height`(0.402) \newpage
-
-```{r scaledata, warning=FALSE, message=FALSE}
-round(diag(var(group21_new[,4:6])),2) ##significant difference variance
-group21_new$depth <- scale(group21_new$depth,center=TRUE, scale=TRUE)
-group21_new$height <- scale(group21_new$height,center=TRUE, scale=TRUE)
-group21_new$width <- scale(group21_new$width,center=TRUE, scale=TRUE)
-```
-
-Based on the result above, we conclude that there is minimal variation between the `depth` of the different products in the data set, with more significant variation in the `height`. Still, the tremendous variation is in the `width` between the products. In other words, the table above means that the `depth` distribution is the smallest, followed by the `height`, and the `width` distribution is the largest. Finally, even the slightest `depth` variation has an enormous value, so we use the scale function to normalize the data.
+Figure \ref{cor:numerical} shows that there's a weak relationship between `height` and `depth`(0.02), a mild relationship between `width` and `depth`(0.36) and a moderate relationship between `width` and `height`(0.4) \newpage
 
 Then we use chi-square test to check if there is co-linearity in the three categorical variables
 
@@ -158,7 +157,7 @@ levels(group21_new$newprice) <- c("more", "less")
 
 A Boxplot is used here to find the relationship between our response variable `newprice` and numeric variables.
 
-```{r boxplot, warning=FALSE, message=FALSE, fig.cap="\\label{box:Newprice} Boxplot of newprice by numeric variables", fig.width=5, fig.height=3}
+```{r boxplot, warning=FALSE, message=FALSE, fig.cap="\\label{box:Newprice} Boxplot of newprice by numeric variables", fig.width=4, fig.height=2}
 #Boxplot
 box1<-ggplot(data = group21_new, aes(x = newprice, y = depth , fill = newprice))+
   geom_boxplot() +
@@ -221,10 +220,8 @@ bar1<-ggplot()+
 bar1
 ```
 
-\newpage
-
 Figure \ref{bar1:Newprice}, for all categories of furniture, the proportion of most of the "less" is less than 0.5, indicating that the ratio of more than 1000 Saudi Riyals exceeds the balance of less than 1000 Saudi Riyals in almost all furniture, so there is no apparent connection between `category` and our dependent variable `new_price`, and for our analysis, `category` is not a representative variable of whether there is an association between `category` and greater than 1000 Saudi Riyals. There are four furniture groups with a single weighting, specifically, caf. Furniture, chests of drawers & drawer units, children's furniture and nursery furniture, all of which have a price greater than 1000 Saudi Riyals, but all tables of room dividers cost less than 1000 Saudi Riyals.
-
+\newpage
 ```{r barplot2, warning=FALSE, message=FALSE, fig.cap="\\label{bar2:Newprice}Boxplot of newprice by categorical variables(sellable_online)", fig.width=5, fig.height=2.5}
 bar2<-ggplot()+ 
   geom_bar(data=group21_new,
@@ -239,7 +236,7 @@ bar2<-ggplot()+
 bar2
 ```
 
-Figure \ref{bar2:Newprice}, in the "false" part of the above chart, there are no furniture items larger than 1000 Saudi Riyals, which means that all furniture items not sold online are smaller than 1000 Saudi Riyals. Therefore, using `sellable_online` as the independent variable cannot be entirely explained by the relationship with `new_price`. \newpage
+Figure \ref{bar2:Newprice}, in the "false" part of the above chart, there are no furniture items larger than 1000 Saudi Riyals, which means that all furniture items not sold online are smaller than 1000 Saudi Riyals. Therefore, using `sellable_online` as the independent variable cannot be entirely explained by the relationship with `new_price`. 
 
 ```{r barplot3, warning=FALSE, message=FALSE, fig.cap="\\label{bar3:Newprice}Boxplot of newprice by categorical variables(other_colors)", fig.width=5, fig.height=2.5}
 bar3<-ggplot()+ 
