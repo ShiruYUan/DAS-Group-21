@@ -397,9 +397,9 @@ Based on our knowledge, the Hosmer-Lemeshow test is used for testing model goodn
 
 # Conclusions {#sec:con}
 
-When increasing the complexity of the model, it is most beneficial to increase the complexity of the `width` to improve the model's fit directly. The final model build tells us that the `width` variable is an important variable that affects the dependent variable `new_price` and that the p-value of the model becomes more significant as the exponential value of width is increased.
+When increasing the complexity of the model, it is most beneficial to increase the complexity of the `width` to improve the model's fit directly. The final model build tells us that the `width` is an important variable that affects `new_price (y)` and that the p-value in HL Test of the model becomes more significant as the exponential value of width is increased.
 
-For IKEA furniture larger than 1000 Saudi Riyals, `category` and `sellable_online` have a lot of bias for analyzing the model. In contrast, `other_colors` can help build the most comprehensive relationship with the dependent variable and make our model more convincing.
+For IKEA furniture larger than 1000 Saudi Riyals, `category` and `sellable_online` have a lot of bias for analyzing the model.
 
 # Further extension {#sec:fur}
 
